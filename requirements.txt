@@ -1,0 +1,6 @@
+numpy
+numba
+pandas
+matplotlib
+opencv-python
+scikit-fmm
