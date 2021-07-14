@@ -1,4 +1,3 @@
-from _typeshed import NoneType
 import numpy as np
 import cv2 as cv
 from typing import List, Union
@@ -22,7 +21,7 @@ class Drawer2D(Img2D, Mask2D):
         return f_im.astype(np.uint8)
     
     @staticmethod
-    def drawMasks(img: np.ndarray, masks: List[np.ndarray], alpha: float = 0, colors : Union[NoneType, List[tuple], tuple] = None):
+    def drawMasks(img: np.ndarray, masks: List[np.ndarray], alpha: float = 0, colors : Union[None, List[tuple], tuple] = None):
         """
         - alpha: transparency
         - mode (str): 
@@ -70,7 +69,7 @@ class Drawer2D(Img2D, Mask2D):
         return im
     
     @staticmethod
-    def visualCompareSegmentations(img: np.ndarray, masks_ori: List[np.ndarray], color_dict: dict, alpha: float = 1.0, tags: Union[List[str], NoneType] = None):
+    def visualCompareSegmentations(img: np.ndarray, masks_ori: List[np.ndarray], color_dict: dict, alpha: float = 1.0, tags: Union[List[str], None] = None):
         """
         generate comprehensive images of the labels to compare segemtation results
         - masks_ori

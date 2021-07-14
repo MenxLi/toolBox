@@ -4,7 +4,7 @@ import numba as nb
 from typing import Union, List
 from .arrayBase import ArrayBase
 
-class EvalBase(ArrayBase):
+class ImEvalBase(ArrayBase):
 	def __init__(self) -> None:
 		pass
 	
