@@ -21,7 +21,7 @@ class StatBasic:
     @staticmethod
     def getFormattedMeanStd(data: np.ndarray, tag = "Mean and Std"):
         statistic = StatBasic.meanStd(data)
-        mean_std = "Mean: {mean} | Std: {std} - count: {count}".format(statistic["mean"], statistic["std"], statistic["count"])
+        mean_std = "Mean: {mean} | Std: {std} - count: {count}".format(mean = statistic["mean"], std = statistic["std"], count = statistic["count"])
         string = "{}: \n\t{}".format(tag, mean_std)
         return string
 

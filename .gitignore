@@ -1,5 +1,8 @@
 *__pycache__
 *.swp
 *.vscode
-*.ipynb
+*.ipynb*
+*.egg-info
 test.py
+build
+dist

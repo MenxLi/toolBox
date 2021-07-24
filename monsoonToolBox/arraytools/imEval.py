@@ -70,18 +70,25 @@ class ImEvalBase(ArrayBase):
 	@staticmethod
 	def batchIouLoop(mask1s: np.ndarray, mask2s: np.ndarray) -> np.ndarray:
 		"""
-		####### For testing propose, use batchIou instead ##########
 		calculate ious of a batch of images
 		returns 1D array
 		"""
-		assert mask1s.shape == mask2s.shape, "The masks should have same shape"
-		epsilon = 1e-7
+		assert len(mask1s) == len(mask2s), "The masks should have same length"
 		output = np.array([], dtype=float)
 		for m1, m2 in zip(mask1s, mask2s):
-			intersection_bool = np.logical_and(m1, m2)
-			intersection = intersection_bool.sum()
-			union_bool = np.logical_or(m1, m2)
-			union = union_bool.sum() + epsilon
-			_iou = intersection/union
+			_iou = ImEvalBase.iou(m1, m2)
 			output = np.concatenate((output, [_iou]))
+		return output
+
+	@staticmethod
+	def batchDiceLoop(mask1s: np.ndarray, mask2s: np.ndarray) -> np.ndarray:
+		"""
+		calculate dices of a batch of images
+		returns 1D array
+		"""
+		assert len(mask1s) == len(mask2s), "The masks should have same length"
+		output = np.array([], dtype=float)
+		for m1, m2 in zip(mask1s, mask2s):
+			_dice = ImEvalBase.dice(m1, m2)
+			output = np.concatenate((output, [_dice]))
 		return output

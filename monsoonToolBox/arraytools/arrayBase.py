@@ -16,8 +16,9 @@ class ArrayBase:
 	def mapMatUint8(arr: np.ndarray)->np.ndarray:
 		return ArrayBase.stretchArr(arr, 0, 255).astype(np.uint8)
 
+ArrayNd = ArrayBase
 
-class Array2D(ArrayBase):
+class Array2D(ArrayNd):
 	@staticmethod
 	def gray2rgb(img: np.ndarray)->np.ndarray:
 		new_img = np.concatenate((img[:,:,np.newaxis], img[:,:,np.newaxis], img[:,:,np.newaxis]), axis=2)
