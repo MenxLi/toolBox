@@ -20,6 +20,33 @@ ArrayNd = ArrayBase
 
 class Array2D(ArrayNd):
 	@staticmethod
+	def imgChannel(img: np.ndarray)->int:
+		if len(img.shape)==3:
+			return img.shape[2]
+		if len(img.shape)==2:
+			return 1
+	@staticmethod
 	def gray2rgb(img: np.ndarray)->np.ndarray:
 		new_img = np.concatenate((img[:,:,np.newaxis], img[:,:,np.newaxis], img[:,:,np.newaxis]), axis=2)
 		return new_img
+	
+	def getCoordGrid2D(shape):
+		xs = [list(range(shape[1]))]*shape[0]
+		xs = np.array(xs)[..., np.newaxis]
+		ys = [list(range(shape[0]))]*shape[1]
+		ys = np.array(ys).transpose()[..., np.newaxis]
+		coords = np.concatenate((ys, xs), axis = -1)
+		return coords
+
+class Array3D(ArrayNd):
+	@staticmethod
+	def getCoordGrid3D(shape):
+		a1s = [[list(range(shape[1]))]*shape[0]]*shape[2]
+		a1s = np.transpose(np.array(a1s), axes = [1,2,0])[..., np.newaxis]
+		a0s = [[list(range(shape[0]))]*shape[2]]*shape[1]
+		a0s = np.transpose(np.array(a0s), axes = [2,0,1])[..., np.newaxis]
+		a2s = [[list(range(shape[2]))]*shape[1]]*shape[0]
+		a2s = np.array(a2s)[...,np.newaxis]
+
+		coords = np.concatenate((a0s,a1s,a2s), axis = -1)
+		return coords

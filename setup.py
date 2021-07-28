@@ -11,5 +11,11 @@ setup(
 
     packages=find_packages(),
 
-	install_requires=['numpy']
+	install_requires=['numpy', 'scipy', 'scikit-fmm'],
+
+    entry_points = {
+        "console_scripts":[
+            "readPickle=monsoonToolBox.cmdCall.readPickle:main"
+        ]
+    }
 )

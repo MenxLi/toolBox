@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Tuple, Union
 import numpy as np
 from numpy.lib.arraysetops import isin
 import pandas as pd
@@ -27,7 +27,7 @@ class StatBasic:
 
 class Stat1D(StatBasic):
     @staticmethod
-    def washNone(data: Union[np.ndarray, list]):
+    def washNone(data: Union[np.ndarray, list]) -> Tuple[np.ndarray, int]:
         """
         Delete (wash out) all None items in the list and return residual items and None count
         data - 1D or array of number or None
@@ -39,3 +39,15 @@ class Stat1D(StatBasic):
         none_count = none_mask.sum()
         data_ = np.ma.masked_array(data, none_mask).compressed()
         return data_, none_count
+    
+    @staticmethod
+    def notZeros(data: Union[np.ndarray, list]) -> np.ndarray:
+        """
+        Check if element in the array is all zeros
+        Return 1D bool array of the status of each element
+        """
+        result = np.zeros(shape = len(data), dtype = bool)
+        for i in range(len(data)):
+            if (data[i] == 0).all():
+                result[i] = True
+        return np.logical_not(result)

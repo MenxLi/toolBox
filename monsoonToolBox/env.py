@@ -3,7 +3,7 @@ from .filetools import parDir, pJoin
 
 def setupEnvVar():
 	main_dir = parDir(__file__)
-	os.environ("TBX_LOGFILE_PATH") = pJoin(main_dir, "log.txt")
+	# os.environ("TBX_LOGFILE_PATH") = pJoin(main_dir, "log.txt")
 
 def getEnvVar(name: str):
 	var = os.getenv(name)

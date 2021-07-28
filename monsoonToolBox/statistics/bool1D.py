@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from .basic import StatBasic
+from .basic import StatBasic, Stat1D
+import pprint, textwrap
 
 """Methods for 1D bool array"""
 
-class Bool1D(StatBasic):
+class Bool1D(Stat1D):
     """Methods for 1d bool array"""
     @staticmethod
     def _getFormattedPercentage(data: np.ndarray, tag: str = "Percentage"):
@@ -23,7 +24,7 @@ class Bool1D(StatBasic):
         return percentage
     
     @staticmethod
-    def calcConfusion(y_true: np.ndarray, y_pred:np.ndarray):
+    def calcConfusion(y_true: np.ndarray, y_pred:np.ndarray) -> dict:
         """
         Calculate confusion matrix, 
         - y_true and y_pred: 1D array of T/F | 1/0
@@ -34,7 +35,7 @@ class Bool1D(StatBasic):
             y_pred = np.array(y_pred)
         y_true = y_true.astype(np.bool)
         y_pred = y_pred.astype(np.bool)
-        d_size = len(y_true)
+        d_size = y_true.size
         TP = np.logical_and(y_true, y_pred).astype(np.int).sum()/d_size
         TN = np.logical_and(np.logical_not(y_true), np.logical_not(y_pred)).astype(np.int).sum()/d_size
         FN = np.logical_and(y_true, np.logical_not(y_pred)).astype(np.int).sum()/d_size
@@ -45,6 +46,28 @@ class Bool1D(StatBasic):
             "FN": FN,
             "FP":FP
         }
+        return confusion
+    
+    @staticmethod
+    def calcConfusionPrint(y_true: np.ndarray, y_pred:np.ndarray, tag = "Confusion", **pp_kwargs) -> dict:
+        """
+        Calculate and print confusion matrix, 
+        - y_true and y_pred: 1D array of T/F | 1/0
+        """
+        confusion = Bool1D.calcConfusion(y_true, y_pred)
+        print("{}:".format(tag))
+        pp = pprint.PrettyPrinter(**pp_kwargs)
+        # pp.pprint(Bool1D._convertConfusionMatrixAsDataFrame(confusion))
+        indent_prefix = "\t\t"
+        # wrapper = textwrap.TextWrapper(initial_indent=indent_prefix, subsequent_indent=indent_prefix)
+        _indent = "\t"
+        _round = 4
+        _init_indent = "\t"
+        print("{ii}{i}pred_0{i}pred_1".format(ii = _init_indent, i = _indent))
+        print("{ii}true_0{i}{TN}{i}{FP}".format(ii = _init_indent, i = _indent, TN = round(confusion["TN"], _round), FP = round(confusion["FP"], _round)))
+        print("{ii}true_1{i}{FN}{i}{TP}".format(ii = _init_indent, i = _indent, FN = round(confusion["FN"], _round), TP = round(confusion["TP"], _round)))
+        # text = "\tpred_0\tpred_1\ntrue_0\t{TN}\t{FP}\ntrue_1\t{FN}\t{TP}".format(TN = confusion["TN"], TP = confusion["TP"], FN = confusion["FN"], FP = confusion["FP"])
+        # print(wrapper.fill(text))
         return confusion
 
     @staticmethod
@@ -64,9 +87,8 @@ class Bool1D(StatBasic):
         plt.show()
 
     @staticmethod
-    def _getFormattedConfusionMatrix(self, confusion, tag = "Confusion matrix"):
+    def _convertConfusionMatrixAsDataFrame(confusion):
         data = {"pred_0": pd.Series([confusion["TN"], confusion["FN"]], index = ["true_0", "true_1"]),
                 "pred_1": pd.Series([confusion["FP"], confusion["TP"]], index = ["true_0", "true_1"])}
         df = pd.DataFrame(data)
-        string = "{}: \n{}".format(tag, df.to_string())
-        return string
+        return df

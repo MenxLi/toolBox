@@ -1,9 +1,10 @@
 import numpy as np
 import cv2 as cv
 from typing import List, Union
-from .im2d import Img2D, Mask2D
+from .mask2d import Mask2D
+from .img2d import Img2D
 
-class Drawer2D(Img2D, Mask2D):
+class Drawer2D(Mask2D):
     LINE_THICKNESS = 1
     DRAWING_MODE = "outline"
     DEFAULT_COLOR = (255,0,0)
