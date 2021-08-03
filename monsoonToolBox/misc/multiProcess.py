@@ -5,7 +5,7 @@ from .misc import divideChunks
 
 def lisJobParallel(func: typing.Callable, list_like: typing.Iterable, use_buffer:bool = False, n_workers: int = -1) -> list:
 	"""
-	parallel a job that is applied to a list-like object
+	Parallel a job that is applied to a list-like object
 	The paralleled function should only take one argument which is the list_like
 	the function should be able to be run on subset of the list_like
 	and return list-like results or None
