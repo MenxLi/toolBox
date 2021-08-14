@@ -8,7 +8,9 @@ except ModuleNotFoundError:
 
 def main():
 	try:
-		notebook_fname = sys.argv[1].strip('.ipynb')
+		notebook_fname = sys.argv[1]
+		if notebook_fname.endswith(".ipynb"):
+			notebook_fname = notebook_fname[:-6]
 	except IndexError:
 		print("Usage: create-notebook <notebook>")
 		exit()

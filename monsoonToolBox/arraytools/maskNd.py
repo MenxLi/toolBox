@@ -155,9 +155,10 @@ class MaskEvalNd(MaskNd):
 	@staticmethod
 	def batchHausdorffDistance_p(msk1s: typing.Union[np.ndarray, list], msk2s: typing.Union[np.ndarray, list], n_workers = -1, **kwargs) -> typing.List[float]:
 		def _func(mask_pairs):
-			result = np.zeros(len(mask_pairs), float)
+			result = []
 			for i in range(len(mask_pairs)):
-				result[i] = MaskEvalNd.hausdorffDistance(*mask_pairs[i], **kwargs)
+				result_ = MaskEvalNd.hausdorffDistance(*mask_pairs[i], **kwargs)
+				result.append(result_)
 			return result
 		return lisJobParallel(_func, list(zip(msk1s, msk2s)), use_buffer=False, n_workers=n_workers)
 

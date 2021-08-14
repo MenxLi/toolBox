@@ -1,7 +1,7 @@
 import typing, math, os
 import numpy as np
 import multiprocessing, tempfile, pickle
-from .misc import divideChunks
+from .divideIter import divideChunks
 
 def lisJobParallel(func: typing.Callable, list_like: typing.Iterable, use_buffer:bool = False, n_workers: int = -1) -> list:
 	"""
