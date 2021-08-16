@@ -5,7 +5,7 @@ class ArrayBase:
 	def __init__(self) -> None:
 		pass
 	@staticmethod
-	def stretchArr(arr: np.ndarray, min_val: Union[int, float] = 0, max_val: Union[int, float] = 255)-> np.ndarray:
+	def stretchArr(arr: np.ndarray, min_val: Union[int, float] = 0, max_val: Union[int, float] = 255, dtype = float)-> np.ndarray:
 		if not isinstance(arr, np.ndarray):
 			raise Exception("Input should be an ndarray")
 		arr = arr.astype(float)

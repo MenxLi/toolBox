@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import matplotlib.pyplot as plt
 from typing import List, Union
 from .mask2d import Mask2D
 from .img2d import Img2D
@@ -8,6 +9,14 @@ class Drawer2D(Mask2D):
     LINE_THICKNESS = 1
     DRAWING_MODE = "outline"
     DEFAULT_COLOR = (255,0,0)
+
+    @staticmethod
+    def imshowGrid(imgs: List[np.ndarray], n_col:int = 2, **imshow_params):
+        n_imgs = len(imgs)
+        n_row = np.ceil(n_imgs/n_col)
+        for i in range(n_imgs):
+            plt.subplot(int(n_row), int(n_col), i+1)
+            plt.imshow(imgs[i], **imshow_params)
 
     @staticmethod
     def overlapMask(img: np.ndarray, mask: np.ndarray, color: Union[tuple, list] = (255,0,0), alpha = 1) -> np.ndarray:

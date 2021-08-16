@@ -5,3 +5,4 @@ from . import misc
 from . import statistics
 
 stat = statistics
+fptools = pathtools = filetools

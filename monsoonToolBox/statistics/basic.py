@@ -30,7 +30,7 @@ class Stat1D(StatBasic):
     def washNone(data: Union[np.ndarray, list]) -> Tuple[np.ndarray, int]:
         """
         Delete (wash out) all None items in the list and return residual items and None count
-        data - 1D or array of number or None
+        data - 1D array of number or None
         return data_washed, none_count
         """
         if isinstance(data, list):

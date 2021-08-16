@@ -16,7 +16,8 @@ setup(
     entry_points = {
         "console_scripts":[
             "readPickle=monsoonToolBox.cmdCall.readPickle:main",
-            "createIpynb=monsoonToolBox.cmdCall.createIpynb:main"
+            "createIpynb=monsoonToolBox.cmdCall.createIpynb:main",
+            "pyTrail=monsoonToolBox.cmdCall.pyTrail:main"
         ]
     }
 )

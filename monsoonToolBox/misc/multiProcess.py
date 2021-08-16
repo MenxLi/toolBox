@@ -1,9 +1,10 @@
-import typing, math, os
+import re
+import typing, math, os, io
 import numpy as np
 import multiprocessing, tempfile, pickle
 from .divideIter import divideChunks
 
-def lisJobParallel(func: typing.Callable, list_like: typing.Iterable, use_buffer:bool = False, n_workers: int = -1) -> list:
+def lisJobParallel(func: typing.Callable, list_like: typing.Iterable, use_buffer:bool = True, n_workers: int = -1) -> list:
 	"""
 	Parallel a job that is applied to a list-like object
 	The paralleled function should only take one argument which is the list_like
@@ -64,6 +65,51 @@ def lisJobParallel(func: typing.Callable, list_like: typing.Iterable, use_buffer
 			out.append(None)
 	return out
 
-def inferWorkers() -> int:
-	workers = multiprocessing.cpu_count() - 1
+def mapJobParallel(func: typing.Callable, lis: typing.Iterable, **kwargs) -> list:
+	"""
+	Parallel a job that is applied to each element of the lis
+	The paralleled function should only take one argument which is any element of the lis
+	the function should be able to be run on each element of the lis
+	and return a list of all of the results
+	i.e. 
+		func(lis_elem) -> retuen_elem
+	- lis: list-like argument
+	- n_workers: number of process
+	- use_buffer: use hard disk as buffer for each subprocess output, enable when the data exchange is large
+		if the program stuck at Pipe connection, try set this to True
+	"""
+	def _func(_lis):
+		return [func(elem) for elem in _lis]
+	return lisJobParallel(func=_func, list_like=lis, **kwargs)
+
+def inferWorkers(relax = 1) -> int:
+	workers = multiprocessing.cpu_count() - relax
 	return workers
+
+
+def lisJobParallel_(func: typing.Callable, list_like: typing.Iterable, n_workers: int = -1) -> list:
+	"""
+	Parallel a job that is applied to a list-like object (Use multiprocessing.Pool)
+	The paralleled function should only take one argument which is the list_like
+	the function should be able to be run on subset of the list_like
+	and return list-like results or None
+	i.e. 
+		func(list_like) -> list_like2 | None
+	- list_like: list-like argument
+	- n_workers: number of process
+	"""
+	if n_workers <= 0:
+		n_workers = inferWorkers()
+
+	data = list_like
+	chunk_size = math.ceil(len(data)/n_workers)
+
+	pool = multiprocessing.Pool(n_workers)
+	results = pool.map(func, divideChunks(data, chunk_size))
+	out = []
+	for out_ in results:
+		if out_ is not None:
+			out = [*out, *out_]
+		else:
+			out.append(None)
+	return out
