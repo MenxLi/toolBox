@@ -3,6 +3,7 @@
 *.vscode
 *.ipynb*
 *.egg-info
+*_tmp.*
 test.py
 build
 dist

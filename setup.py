@@ -11,7 +11,7 @@ setup(
 
     packages=find_packages(),
 
-	install_requires=['numpy', 'scipy', 'scikit-fmm'],
+	install_requires=['numpy>=1.19', 'scipy', 'scikit-fmm'],
 
     entry_points = {
         "console_scripts":[
