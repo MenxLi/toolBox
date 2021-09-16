@@ -29,7 +29,7 @@ class TrainerVanilla(TrainerAbstract):
 			print("Using default poly lr: ", str(self.lr_instance))
 		return self.lr_instance(epochs, total_epochs, self.base_lr)
 	
-	def saveModel(self, save_dir, mode = "latest"):
+	def saveModel(self, save_dir, mode = "latest", quiet = False):
 		if not os.path.exists(save_dir):
 			os.mkdir(save_dir)
 
@@ -78,7 +78,8 @@ class TrainerVanilla(TrainerAbstract):
 		with open(pJoin(save_dir, "comment.txt"), "w") as fp:
 			fp.write(comment)
 		
-		print("Model ({}) saved.".format(mode))
+		if not quiet:
+			print("Model ({}) saved.".format(mode))
 	
 	def loadModel(self, save_dir:str, weights_only:bool = True, mode:str = "latest"):
 		"""Load entire model or model weights into self.model
@@ -189,6 +190,7 @@ class TrainerVanilla(TrainerAbstract):
 		return super().onTestEpochEnd(test_loss=test_loss)
 	
 	def onTrainEnd(self, **kwargs) -> None:
+		self.saveModel(self.save_dir, mode="entire")
 		print("Done!")
 		print("Training took: {}s".format(time.time()-self.timer))
 		return super().onTrainEnd()
