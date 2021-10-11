@@ -1,5 +1,7 @@
+from typing import List, Union
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.core.fromnumeric import shape
 import pandas as pd
 from .basic import StatBasic, Stat1D
 import pprint, textwrap
@@ -24,7 +26,7 @@ class Bool1D(Stat1D):
         return percentage
     
     @staticmethod
-    def calcConfusion(y_true: np.ndarray, y_pred:np.ndarray) -> dict:
+    def calcConfusionBinary(y_true: np.ndarray, y_pred:np.ndarray) -> dict:
         """
         Calculate confusion matrix, 
         - y_true and y_pred: 1D array of T/F | 1/0
@@ -49,12 +51,12 @@ class Bool1D(Stat1D):
         return confusion
     
     @staticmethod
-    def calcConfusionPrint(y_true: np.ndarray, y_pred:np.ndarray, tag = "Confusion", **pp_kwargs) -> dict:
+    def calcConfusionBinaryPrint(y_true: np.ndarray, y_pred:np.ndarray, tag = "Confusion", **pp_kwargs) -> dict:
         """
         Calculate and print confusion matrix, 
         - y_true and y_pred: 1D array of T/F | 1/0
         """
-        confusion = Bool1D.calcConfusion(y_true, y_pred)
+        confusion = Bool1D.calcConfusionBinary(y_true, y_pred)
         print("{}:".format(tag))
         pp = pprint.PrettyPrinter(**pp_kwargs)
         # pp.pprint(Bool1D._convertConfusionMatrixAsDataFrame(confusion))
@@ -69,6 +71,61 @@ class Bool1D(Stat1D):
         # text = "\tpred_0\tpred_1\ntrue_0\t{TN}\t{FP}\ntrue_1\t{FN}\t{TP}".format(TN = confusion["TN"], TP = confusion["TP"], FN = confusion["FN"], FP = confusion["FP"])
         # print(wrapper.fill(text))
         return confusion
+
+    @staticmethod
+    def calcConfusion(y_true: np.ndarray, y_pred:np.ndarray, n_classes:Union[None, int] = None) -> np.ndarray:
+        """Calculate confusion matrix on 2 given 1D class arrays (int)
+        The first class of the given arrays should be 0
+
+        Args:
+            y_true (np.ndarray): 1D array
+            y_pred (np.ndarray): 1D array
+            n_classes (Union[None, int], optional): number of classes. Defaults to None for auto-infer.
+
+        Returns:
+            np.ndarray: 2D array of the counts for each pair
+        """
+        assert len(y_true) == len(y_pred), "Length mismatch between two inputs for calcConfusion"
+        if not isinstance(y_true, np.ndarray):
+            y_true = np.array(y_true)
+        if not isinstance(y_pred, np.ndarray):
+            y_pred = np.array(y_pred)
+        if n_classes is None:
+            n_classes = np.max((np.max(y_true), np.max(y_pred))) + 1
+
+        result = np.zeros(shape = (n_classes, n_classes), dtype=int)
+        for i in range(n_classes):
+            for j in range(n_classes):
+                _y_true = y_true == i
+                _y_pred = y_pred == j
+                result[i][j] = np.sum(np.logical_and(_y_true, _y_pred))
+        return result
+
+    @staticmethod
+    def calcConfusionDF(y_true: np.ndarray, y_pred:np.ndarray, n_classes:Union[None, int] = None, legend: Union[List[str], None] = None) -> pd.DataFrame:
+        """Calculate confusion matrix on 2 given 1D class arrays (int)
+        The first class of the given arrays should be 0
+
+        Args:
+            y_true (np.ndarray): 1D array
+            y_pred (np.ndarray): 1D array
+            n_classes (Union[None, int], optional): number of classes. Defaults to None for auto-infer.
+            legend (Union[None, List[str]], optional): name for each class. Defaults to None for range(n_classes).
+
+        Returns:
+            pd.DataFrame
+        """
+        if n_classes is None:
+            n_classes = np.max((np.max(y_true), np.max(y_pred))) + 1
+        if legend == None:
+            legend = list(range(n_classes))
+        confusion = Bool1D.calcConfusion(y_true, y_pred, n_classes)
+        data = dict()
+        for name_, data_ in zip(legend, confusion.T):
+            data[name_] = data_
+        df = pd.DataFrame(data, index=legend)
+        return df
+
 
     @staticmethod
     def plotConfusion(y_true, y_pred):

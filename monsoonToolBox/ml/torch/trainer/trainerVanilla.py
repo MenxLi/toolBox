@@ -11,6 +11,7 @@ pJoin = os.path.join
 class TrainerVanilla(TrainerAbstract):
 	WEIGHTS_LATEST_FNAME = "weights_latest.pth"
 	WEIGHTS_BEST_FNAME = "weights_best.pth"
+	MODEL_FNAME = "model.pt"
 	HISTORY_FNAME = "history.json"
 	STATUS_FNAME = "status.json"
 	def __init__(self, **kwargs) -> None:
@@ -28,18 +29,22 @@ class TrainerVanilla(TrainerAbstract):
 			print("Using default poly lr: ", str(self.lr_instance))
 		return self.lr_instance(epochs, total_epochs, self.base_lr)
 	
-	def saveModel(self, save_dir, mode = "latest"):
+	def saveModel(self, save_dir, mode = "latest", quiet = False):
 		if not os.path.exists(save_dir):
 			os.mkdir(save_dir)
 
-		# Save weights
-		if mode == "latest":
-			w_fname = self.WEIGHTS_LATEST_FNAME
-		elif mode == "best":
-			w_fname = self.WEIGHTS_BEST_FNAME
+		if mode == "entire":
+			# Save entire model
+			torch.save(self.model, pJoin(save_dir, self.MODEL_FNAME))
 		else:
-			raise Exception("Saving mode can be either latest or best.")
-		torch.save(self.model.state_dict(), pJoin(save_dir, w_fname))
+			# Save weights
+			if mode == "latest":
+				w_fname = self.WEIGHTS_LATEST_FNAME
+			elif mode == "best":
+				w_fname = self.WEIGHTS_BEST_FNAME
+			else:
+				raise Exception("Saving mode can be either latest or best or entire.")
+			torch.save(self.model.state_dict(), pJoin(save_dir, w_fname))
 
 
 		# History dict
@@ -73,18 +78,30 @@ class TrainerVanilla(TrainerAbstract):
 		with open(pJoin(save_dir, "comment.txt"), "w") as fp:
 			fp.write(comment)
 		
-		print("Model ({}) saved.".format(mode))
+		if not quiet:
+			print("Model ({}) saved.".format(mode))
 	
-	def loadModel(self, save_dir, mode = "latest"):
-		# Load weights
-		if mode == "latest":
-			w_fname = self.WEIGHTS_LATEST_FNAME
-		elif mode == "best":
-			w_fname = self.WEIGHTS_BEST_FNAME
+	def loadModel(self, save_dir:str, weights_only:bool = True, mode:str = "latest"):
+		"""Load entire model or model weights into self.model
+		Args:
+			save_dir (str): The directory that saves the model
+			weights_only (bool, optional): Load weights only. Defaults to True.
+			mode (str, optional): Loading mode, can be "latest" or "best" (Only works when only_weights is True). Defaults to "latest".
+		"""
+		if weights_only:
+			# Load weights
+			if mode == "latest":
+				w_fname = self.WEIGHTS_LATEST_FNAME
+			elif mode == "best":
+				w_fname = self.WEIGHTS_BEST_FNAME
+			else:
+				raise Exception("Saving mode can be either latest or best.")
+			self.model.load_state_dict(torch.load(pJoin(save_dir, w_fname)))
+			print("loaded the model weights - {}".format(mode))
 		else:
-			raise Exception("Saving mode can be either latest or best.")
-		self.model.load_state_dict(torch.load(pJoin(save_dir, w_fname)))
-		print("loaded the model weights - {}".format(mode))
+			# Or the entire model
+			self.model = torch.load(pJoin(save_dir, self.MODEL_FNAME))
+			print("loaded the model ({})".format(save_dir))
 
 		# Load history
 		with open(pJoin(save_dir, self.HISTORY_FNAME), "r") as fp:
@@ -173,6 +190,7 @@ class TrainerVanilla(TrainerAbstract):
 		return super().onTestEpochEnd(test_loss=test_loss)
 	
 	def onTrainEnd(self, **kwargs) -> None:
+		self.saveModel(self.save_dir, mode="entire")
 		print("Done!")
 		print("Training took: {}s".format(time.time()-self.timer))
 		return super().onTrainEnd()
