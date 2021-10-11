@@ -4,7 +4,7 @@ setup(
     name="monsoonToolbox",
     version="0.0.1",
     author="Li, Mengxun",
-    author_email="limonsoon@qq.com",
+    author_email="mengxunli@whu.edu.cn",
     description="My toolbox",
 
     url="https://github.com/MenxLi/toolBox", 
