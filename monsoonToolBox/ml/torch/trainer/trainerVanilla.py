@@ -5,6 +5,7 @@ from .trainerAbstract import TrainerAbstract
 from ..learningRate import PolyLR
 import time, os, json
 import matplotlib.pyplot as plt
+import hiddenlayer as hl
 
 pJoin = os.path.join
 
@@ -20,6 +21,7 @@ class TrainerVanilla(TrainerAbstract):
 		self.save_every = 1
 		self.plot_every = 1
 		self.save_dir = None
+		self.draw_lr = True
 		super().__init__(**kwargs)
 
 	def getLr(self, epochs: int, total_epochs: int):
@@ -81,14 +83,13 @@ class TrainerVanilla(TrainerAbstract):
 		if not quiet:
 			print("Model ({}) saved.".format(mode))
 	
-	def loadModel(self, save_dir:str, weights_only:bool = True, mode:str = "latest"):
+	def loadModel(self, save_dir:str, mode:str = "latest"):
 		"""Load entire model or model weights into self.model
 		Args:
 			save_dir (str): The directory that saves the model
-			weights_only (bool, optional): Load weights only. Defaults to True.
-			mode (str, optional): Loading mode, can be "latest" or "best" (Only works when only_weights is True). Defaults to "latest".
+			mode (str, optional): Loading mode, can be "latest" or "best" or "entire".Defaults to "latest".
 		"""
-		if weights_only:
+		if mode == "latest" or mode == "best":
 			# Load weights
 			if mode == "latest":
 				w_fname = self.WEIGHTS_LATEST_FNAME
@@ -98,10 +99,12 @@ class TrainerVanilla(TrainerAbstract):
 				raise Exception("Saving mode can be either latest or best.")
 			self.model.load_state_dict(torch.load(pJoin(save_dir, w_fname)))
 			print("loaded the model weights - {}".format(mode))
-		else:
+		elif mode == "entire":
 			# Or the entire model
 			self.model = torch.load(pJoin(save_dir, self.MODEL_FNAME))
 			print("loaded the model ({})".format(save_dir))
+		else:
+			raise Exception("Unknown loading mode.")
 
 		# Load history
 		with open(pJoin(save_dir, self.HISTORY_FNAME), "r") as fp:
@@ -128,12 +131,22 @@ class TrainerVanilla(TrainerAbstract):
 		fig, ax = plt.subplots()
 		ax.plot(train_loss, label = "train-loss", color = "red")
 		ax.plot(test_loss, label = "test-loss", color = "blue")
-		ax.plot(lr*lr_scale, label = "lr*{:.2f}".format(lr_scale), color = "green")
+		if self.draw_lr:
+			ax.plot(lr*lr_scale, label = "lr*{:.2f}".format(lr_scale), color = "green")
 		ax.legend(loc='upper right')
 		ax.set_xlabel("Epochs")
 		plt.savefig(pJoin(save_dir, "progress.png"))
 		plt.close(fig)
 		del fig, ax
+	
+	def drawNetStructure(self, save_dir, input_shape = None):
+		transforms = [ hl.transforms.Prune('Constant') ] # Removes Constant nodes from graph.
+		if input_shape is None:
+			input_shape = torch.stack([self.train_dataset[0][0], self.train_dataset[0][0]]).shape
+		graph = hl.build_graph(self.model, torch.zeros(input_shape).to(self.device), transforms=transforms)
+		graph.theme = hl.graph.THEMES['blue'].copy()
+		save_path = pJoin(save_dir, "graph")
+		graph.save(save_path, format='png')
 
 	
 	##=================================CallBacks====================================
@@ -141,6 +154,7 @@ class TrainerVanilla(TrainerAbstract):
 	def onTrainStart(self, **kwargs) -> None:
 		self.timer = time.time()
 		self.epoch_timer = time.time()
+		self.drawNetStructure(self.save_dir)
 		return super().onTrainStart()
 	
 	def onTrainEpochStart(self, **kwargs) -> None:
@@ -194,4 +208,21 @@ class TrainerVanilla(TrainerAbstract):
 		print("Done!")
 		print("Training took: {}s".format(time.time()-self.timer))
 		return super().onTrainEnd()
+	
+	# =============================Static methods==========================
+	@staticmethod
+	def plotLoss(save_dir):
+		# Load history
+		with open(pJoin(save_dir, TrainerVanilla.HISTORY_FNAME), "r") as fp:
+			history = json.load(fp)
+		his_len = len(history)
+		train_loss = [history[str(i)]["train_loss"] for i in range(his_len)]
+		test_loss = [history[str(i)]["test_loss"] for i in range(his_len)]
+		# Plot
+		fig, ax = plt.subplots()
+		ax.plot(train_loss, label = "train-loss", color = "red")
+		ax.plot(test_loss, label = "test-loss", color = "blue")
+		ax.legend(loc='upper right')
+		ax.set_xlabel("Epochs")
+		plt.show()
 	

@@ -1,5 +1,6 @@
 from typing import Any, Callable, List, Union
 import numpy as np
+from numpy.lib.arraysetops import isin
 
 class LearningRateAbstract(object):
     def __init__(self) -> None:
@@ -57,14 +58,26 @@ class CosineLR(LearningRateAbstract):
 
 
 class CyclicLR(LearningRateAbstract):
-    def __init__(self, cycle_at: List[int] = [0], 
+    def __init__(self, cycle_at: Union[int, List[int]] = [0], 
             lr_snippet: Union[LearningRateAbstract, Callable] = lambda epoch, max_epoch, base_lr: float(max_epoch-epoch)/max_epoch*base_lr, 
             decay: Union[None, float, List[float]] = None) -> None:
-        """
-        - cycle_at: list of epochs that you want to start cycle
-        - decay: base_lr decay at each cycle, should be None or the same length as cycle_at
-        """
+        """Cyclic learning rate
+
+        Args:
+            max_epoch ([type]): [description]
+            base_lr (float): [description]
+            cycle_at (Union[int, List[int]], optional): (int) cycle every, (list) list of epochs that you want to start cycle. Defaults to [0].
+            lr_snippet (Union[LearningRateAbstract, Callable], optional): [description]. Defaults to lambdaepoch.
+            decay (Union[None, float, List[float]], optional): base_lr decay at each cycle, should be None or the same length as cycle_at. Defaults to None.
+        """        
         super().__init__()
+
+        if isinstance(cycle_at, int):
+            if isinstance(decay, list):
+                cycle_at = [cycle_at * (i+1) for i in range(len(decay))]
+            else:
+                cycle_at = [cycle_at * (i+1) for i in range(100)]
+
         self.snippet = lr_snippet
         if decay is None:
             decay = [1.]*len(cycle_at)

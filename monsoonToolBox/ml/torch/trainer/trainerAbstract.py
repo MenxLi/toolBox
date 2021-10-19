@@ -155,6 +155,9 @@ class TrainerAbstract(object):
 			self.test_dataloader = DataLoader(test_dataset, batch_size=self.batch_size, **dataloader_params)
 	
 	def train(self):
+		"""
+		Train the model, datasets should be feed with <trainer>.feed() in advance
+		"""
 		assert hasattr(self, "train_dataloader"), "Dataset not feed, use {}.feed(<params>) to feed dataset.".format(__class__.__name__)
 		self._train(self.train_dataloader, self.test_dataloader)
 

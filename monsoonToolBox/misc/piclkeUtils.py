@@ -1,5 +1,6 @@
 import pickle
 import argparse
+import pprint
 
 def readPickle(fpath: str):
 	assert fpath.endswith(".pkl"), "The file should have an extension of .pkl"
@@ -8,7 +9,7 @@ def readPickle(fpath: str):
 	return data
 
 def printPickle(fpath:str):
-	print(readPickle(fpath))
+	pprint.pprint(readPickle(fpath))
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser()
