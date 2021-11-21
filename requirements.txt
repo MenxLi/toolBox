@@ -1,5 +1,4 @@
 numpy
-numba
 pandas
 matplotlib
 opencv-python

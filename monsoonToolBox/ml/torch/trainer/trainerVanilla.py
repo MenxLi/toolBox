@@ -1,3 +1,4 @@
+from typing import Union
 import numpy as np
 import torch
 import torch.optim
@@ -16,12 +17,12 @@ class TrainerVanilla(TrainerAbstract):
 	HISTORY_FNAME = "history.json"
 	STATUS_FNAME = "status.json"
 	def __init__(self, **kwargs) -> None:
-
-		self.history = dict()
-		self.save_every = 1
-		self.plot_every = 1
-		self.save_dir = None
-		self.draw_lr = True
+		self.history: dict = dict()
+		self.save_every: int = 1
+		self.plot_every: int = 1
+		self.save_dir: Union[None, str] = None
+		self.draw_lr: bool = True
+		self.description: str = "<No custom description.>"
 		super().__init__(**kwargs)
 
 	def getLr(self, epochs: int, total_epochs: int):
@@ -74,7 +75,7 @@ class TrainerVanilla(TrainerAbstract):
 			hyper_param["batch_size"] = str(self.batch_size)
 		if hasattr(self, "lr_instance"):
 			hyper_param["lr_instance"] = str(self.lr_instance)
-		comment = ""
+		comment = self.description + "\n"
 		for k, v in hyper_param.items():
 			comment += "{} - {}\n".format(k, v)
 		with open(pJoin(save_dir, "comment.txt"), "w") as fp:
@@ -102,6 +103,7 @@ class TrainerVanilla(TrainerAbstract):
 		elif mode == "entire":
 			# Or the entire model
 			self.model = torch.load(pJoin(save_dir, self.MODEL_FNAME))
+			self.model.to(self.device)
 			print("loaded the model ({})".format(save_dir))
 		else:
 			raise Exception("Unknown loading mode.")
