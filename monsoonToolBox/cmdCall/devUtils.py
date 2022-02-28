@@ -8,8 +8,8 @@ def countLine() -> None:
     Count file lines from a directory of specific suffix\
     i.e. countLine . -s .py .json -i .git build\
     "
-    parser = argparse.ArgumentParser()
-    parser.add_argument("path", type = str, help=_description)
+    parser = argparse.ArgumentParser(description=_description)
+    parser.add_argument("path", type = str)
     parser.add_argument("-s", "--suffix", nargs="+", default=[".txt", ".py", ".js", ".c", ".h", ".html", ".json"])
     parser.add_argument("-i", "--ignore", nargs="+", default=["dist", "__pycache__", ".git", "build"])
     args = parser.parse_args()
@@ -54,7 +54,7 @@ def crun() -> None:
     _description = "\
     Run c program with 'gcc <file> -o tbx_tmp.o; ./tbx_tmp.o; rm tbx_tmp.o'\
     "
-    parser = argparse.ArgumentParser(help = _description)
+    parser = argparse.ArgumentParser(description=_description)
     parser.add_argument("file", type = str)
     args = parser.parse_args()
     os.system("gcc -o tbx_tmp.o {}".format(args.file))
