@@ -12,7 +12,7 @@ class TrainerThunder(TrainerVanilla):
         self.save_best = False
 
     def onTrainStart(self, **kwargs) -> None:
-        self.drawNetStructure(self.save_dir)
+        # self.drawNetStructure(self.save_dir)
         return
 	
     def onTrainEpochStart(self, **kwargs) -> None:

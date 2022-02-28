@@ -1,4 +1,5 @@
 import typing
+from typing import Union, List, Tuple
 import numpy as np
 from .arrayBase import Array2D
 from .maskNd import MaskNd, MaskEvalNd
@@ -61,6 +62,20 @@ class Mask2D(MaskNd, Array2D):
         edge_mask = Mask2D.getEdgeMask(msk, thickness=1, op_for_edge=op_for_edge).astype(np.float)
         phi = skfmm.distance(0.5-edge_mask)
         return phi
+
+    @staticmethod
+    def getBBoxs(msk: np.ndarray) -> Union[None, List[Tuple[np.ndarray, np.ndarray]]]:
+        assert len(msk.shape) == 2, "Mask should be of shape (H, W)"
+        if (msk == 0).all():
+            return None
+        pts = []
+        contours, hierarchy = cv.findContours(msk, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        for cnt in contours:
+            cnt = np.squeeze(cnt)
+            min_pt = np.min(cnt, axis=0)
+            max_pt = np.max(cnt, axis=0)
+            pts.append((min_pt, max_pt))
+        return pts
     
 
 class MaskEval2D(MaskEvalNd, Mask2D):

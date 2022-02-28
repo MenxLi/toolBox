@@ -125,21 +125,28 @@ class TrainerVanilla(TrainerAbstract):
 		lr = [self.history[str(i)]["lr"] for i in range(his_len)]
 
 		lr = np.array(lr)
-		if lr.max() == 0:
-			lr_scale = 1
-		else:
-			lr_scale = 1/(lr.max())
+		# if lr.max() == 0:
+			# lr_scale = 1
+		# else:
+			# lr_scale = 1/(lr.max())
 
 		fig, ax = plt.subplots()
 		ax.plot(train_loss, label = "train-loss", color = "red")
 		ax.plot(test_loss, label = "test-loss", color = "blue")
-		if self.draw_lr:
-			ax.plot(lr*lr_scale, label = "lr*{:.2f}".format(lr_scale), color = "green")
 		ax.legend(loc='upper right')
 		ax.set_xlabel("Epochs")
 		plt.savefig(pJoin(save_dir, "progress.png"))
 		plt.close(fig)
 		del fig, ax
+
+		if self.draw_lr:
+			fig, ax = plt.subplots()
+			ax.plot(lr, label = "learning_rate", color = "green")
+			ax.legend(loc='upper right')
+			ax.set_xlabel("Epochs")
+			plt.savefig(pJoin(save_dir, "lr.png"))
+			plt.close(fig)
+			del fig, ax
 	
 	def drawNetStructure(self, save_dir, input_shape = None):
 		transforms = [ hl.transforms.Prune('Constant') ] # Removes Constant nodes from graph.
@@ -156,7 +163,7 @@ class TrainerVanilla(TrainerAbstract):
 	def onTrainStart(self, **kwargs) -> None:
 		self.timer = time.time()
 		self.epoch_timer = time.time()
-		self.drawNetStructure(self.save_dir)
+		# self.drawNetStructure(self.save_dir)
 		return super().onTrainStart()
 	
 	def onTrainEpochStart(self, **kwargs) -> None:

@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
+import matplotlib.figure
 from typing import List, Union
 from .mask2d import Mask2D
 from .img2d import Img2D
@@ -100,4 +101,13 @@ class Drawer2D(Mask2D):
                 ms[i, idx] = (masks_ori[i] == k)
             idx += 1
         return Drawer2D._visualCompareSegmentations(img, ms, tags = tags, alpha =alpha, colors = colors)
+    
+    def gridImgs(imgs: List[np.array], n_col: int, **figure_kwargs) -> matplotlib.figure.Figure:
+        n_im = len(imgs)
+        n_row = np.ceil(n_im/n_col)
+        fig: matplotlib.figure.Figure = plt.figure(**figure_kwargs)
+        for i in range(n_im):
+            ax = fig.add_subplot(int(n_row), int(n_col), i+1)
+            ax.imshow(imgs[i])
+        return fig
     
