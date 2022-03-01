@@ -6,11 +6,12 @@ import numpy as np
 
 class FocalLoss(nn.Module):
 	smooth = 1e-6
-	def __init__(self, gamma=2, weights = None, from_logits = True):
+	def __init__(self, gamma=2, weights = None, from_logits = True, usage = "1D"):
 		super(FocalLoss, self).__init__()
 		self.gamma = gamma
 		self.from_logits = from_logits
 		self.class_average = True
+		self.usage = usage
 		if not weights is None:
 			if not isinstance(weights, torch.Tensor):
 				weights = torch.tensor(weights)
@@ -41,8 +42,10 @@ class FocalLoss(nn.Module):
 			y_pred = F.softmax(inputs, dim = 1)
 		else:
 			y_pred = inputs
-		# y_true = oneHot(targets, n_classes=n_class, device=_device)	# for 2D image
-		y_true = F.one_hot(targets, num_classes = n_class)
+		if self.usage == "1D":
+			y_true = F.one_hot(targets, num_classes = n_class)
+		elif self.usage == "2D":
+			y_true = oneHot2D(targets, n_classes=n_class, device=_device)	# for 2D image
 		assert y_true.shape == y_pred.shape, "y_true and y_pred should have the same shape"
 		# y == 1
 		loss_true = - torch.pow(1-y_pred, self.gamma) * y_true * torch.log(y_pred + self.smooth)

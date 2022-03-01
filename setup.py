@@ -19,7 +19,8 @@ setup(
             "tbx_createIpynb=monsoonToolBox.cmdCall.createIpynb:main",
             "tbx_pyTrail=monsoonToolBox.cmdCall.pyTrail:main",
             "tbx_countLine=monsoonToolBox.cmdCall.devUtils:countLine",
-            "tbx_crun=monsoonToolBox.cmdCall.devUtils:crun"
+            "tbx_crun=monsoonToolBox.cmdCall.devUtils:crun",
+            "tbx_findVTKModules=monsoonToolBox.cmdCall.vtkUtils:callFindVTKModules",
         ]
     }
 )

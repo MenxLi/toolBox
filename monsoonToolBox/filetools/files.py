@@ -1,5 +1,6 @@
 import platform, os, subprocess, shutil
 from .path import subDirAndFiles
+from typing import List
 
 def openFile(filepath):
 	"""Use system application to open a file"""
@@ -22,3 +23,18 @@ def clearDir(dir_path: str):
 		else:
 			os.remove(p)
 		print("{} cleared.".format(dir_path))
+
+def recursivlyFindFilesByExtension(pth: str, suffix: List[str], ignore: List[str] = []) -> List[str]:
+	file_valid = []
+	assert os.path.isdir(pth), "input should be a directory."
+	for f in os.listdir(pth):
+		if f in ignore:
+			continue
+		f_path = os.path.join(pth, f)
+		if os.path.isfile(f_path):
+			for suffix_ in suffix:
+				if f.endswith(suffix_):
+					file_valid.append(f_path)
+		elif os.path.isdir(f_path):
+			file_valid += recursivlyFindFilesByExtension(f_path, suffix)
+	return file_valid

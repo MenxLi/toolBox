@@ -56,6 +56,13 @@ class CosineLR(LearningRateAbstract):
     def __str__(self) -> str:
         return __class__.__name__
 
+class ConstantLR(LearningRateAbstract):
+    def __call__(self, epoch: int, max_epoch: int, base_lr: float) -> None:
+        return base_lr
+    
+    def __str__(self) -> str:
+        return __class__.__name__
+
 
 class CyclicLR(LearningRateAbstract):
     def __init__(self, cycle_at: Union[int, List[int]] = [0], 

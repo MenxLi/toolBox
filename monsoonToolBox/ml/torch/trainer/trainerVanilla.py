@@ -23,6 +23,7 @@ class TrainerVanilla(TrainerAbstract):
 		self.save_dir: Union[None, str] = None
 		self.draw_lr: bool = True
 		self.description: str = "<No custom description.>"
+		self.save_best: bool = True
 		super().__init__(**kwargs)
 
 	def getLr(self, epochs: int, total_epochs: int):
@@ -203,7 +204,7 @@ class TrainerVanilla(TrainerAbstract):
 			if self.save_dir is not None:
 				self.saveModel(self.save_dir, mode = "latest")
 		
-		if self.save_dir is not None and test_loss<self.min_loss:
+		if self.save_dir is not None and test_loss<self.min_loss and self.save_best:
 			self.min_loss = test_loss
 			self.saveModel(self.save_dir, mode="best")
 
