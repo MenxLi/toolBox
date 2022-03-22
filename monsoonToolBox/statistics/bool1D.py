@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Tuple, Union
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.core.fromnumeric import shape
@@ -128,20 +128,27 @@ class Bool1D(Stat1D):
 
 
     @staticmethod
-    def plotConfusion(y_true, y_pred):
+    def plotConfusion(y_true, y_pred, save: str = None, labels: List[str] = None, **sns_heatmap_params):
         # https://datatofish.com/confusion-matrix-python/
         import seaborn as sn
-        if not isinstance(y_true, np.ndarray):
-            y_true = np.array(y_true).astype(np.int)
-        if not isinstance(y_pred, np.ndarray):
-            y_pred = np.array(y_pred).astype(np.int)
-        data = {'y_Actual': y_true,
-        'y_Predicted': y_pred }
-        df = pd.DataFrame(data, columns=['y_Actual','y_Predicted'])
-        confusion_matrix = pd.crosstab(df['y_Actual'], df['y_Predicted'], rownames=['Actual'], colnames=['Predicted'], margins = True)
+        # if not isinstance(y_true, np.ndarray):
+            # y_true = np.array(y_true).astype(np.int)
+        # if not isinstance(y_pred, np.ndarray):
+            # y_pred = np.array(y_pred).astype(np.int)
+        # data = {'y_Actual': y_true,
+        # 'y_Predicted': y_pred }
+        # df = pd.DataFrame(data, columns=['y_Actual','y_Predicted'])
+        # confusion_matrix = pd.crosstab(df['y_Actual'], df['y_Predicted'], \
+            # rownames=['Actual'], colnames=['Predicted'], margins = False)
 
-        sn.heatmap(confusion_matrix, annot=True)
-        plt.show()
+        confusion_matrix = Bool1D.calcConfusionDF(y_true, y_pred)
+        sn.heatmap(confusion_matrix, annot=True, xticklabels = labels, yticklabels=labels, **sns_heatmap_params)
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
+        if not save:
+            plt.show()
+        else:
+            plt.savefig(save)
 
     @staticmethod
     def _convertConfusionMatrixAsDataFrame(confusion):

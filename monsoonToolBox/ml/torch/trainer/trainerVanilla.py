@@ -85,7 +85,7 @@ class TrainerVanilla(TrainerAbstract):
 		if not quiet:
 			print("Model ({}) saved.".format(mode))
 	
-	def loadModel(self, save_dir:str, mode:str = "latest"):
+	def loadModel(self, save_dir:str, mode:str = "latest") -> torch.nn.Module:
 		"""Load entire model or model weights into self.model
 		Args:
 			save_dir (str): The directory that saves the model
@@ -118,6 +118,7 @@ class TrainerVanilla(TrainerAbstract):
 			status = json.load(fp)
 		for k,v in status.items():
 			setattr(self, k, v)
+		return self.model
 	
 	def drawHistory(self, save_dir):
 		his_len = len(self.history)

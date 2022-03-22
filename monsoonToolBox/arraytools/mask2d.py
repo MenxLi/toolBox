@@ -10,6 +10,7 @@ from ..misc import lisJobParallel
 
 
 class Mask2D(MaskNd, Array2D):
+    @staticmethod
     def getCentroid(msk: np.ndarray, return_xy = False) -> typing.Tuple[int, int]:
         """
 		- msk: bool type numpy array
@@ -26,7 +27,7 @@ class Mask2D(MaskNd, Array2D):
             return centroid[::-1]
         else:
             return centroid
-    
+
     @staticmethod
     def getEdgeMask(msk: np.ndarray, thickness:int = 1, op_for_edge:str = "balance") -> np.ndarray:
         """

@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from monsoonToolBox._version import __version__
 
 setup(
     name="monsoonToolbox",
-    version="0.0.1",
+    version=__version__,
     author="Li, Mengxun",
     author_email="mengxunli@whu.edu.cn",
     description="My toolbox",
@@ -11,7 +12,7 @@ setup(
 
     packages=find_packages(),
 
-	install_requires=['numpy>=1.19', 'scipy', 'scikit-fmm', "matplotlib"],
+	install_requires=['numpy>=1.19', 'scipy', "matplotlib"],
 
     entry_points = {
         "console_scripts":[

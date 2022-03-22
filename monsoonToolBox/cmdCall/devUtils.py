@@ -57,6 +57,6 @@ def crun() -> None:
     parser = argparse.ArgumentParser(description=_description)
     parser.add_argument("file", type = str)
     args = parser.parse_args()
-    os.system("gcc -o tbx_tmp.o {}".format(args.file))
+    os.system("gcc -o ./tbx_tmp.o {}".format(args.file))
     os.system("./tbx_tmp.o")
-    os.system("rm tbx_tmp.o")
+    os.system("rm ./tbx_tmp.o")

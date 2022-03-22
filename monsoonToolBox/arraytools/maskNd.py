@@ -8,7 +8,13 @@ from scipy import ndimage
 from .arrayBase import ArrayNd
 from ..misc import lisJobParallel
 
+NumTVar = typing.TypeVar("NumTVar", int, float)
+
 class MaskNd(ArrayNd):
+	@staticmethod
+	def area(msk: np.ndarray, area_per_pixel: NumTVar = 1) -> NumTVar:
+		return msk.sum()*area_per_pixel
+
 	@staticmethod
 	def getEdgeMask(msk: np.ndarray, thickness:int = 1, op_for_edge:str = "balance") -> np.ndarray:
 		"""

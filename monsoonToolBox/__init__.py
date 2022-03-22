@@ -1,8 +1,3 @@
-from . import arraytools
-from . import filetools
-from . import logtools
-from . import misc
-from . import statistics
+from monsoonToolBox import config
 
-stat = statistics
-fptools = pathtools = filetools
+config.init()
