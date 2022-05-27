@@ -3,7 +3,7 @@ from monsoonToolBox.statistics.boolNd import BoolNd
 import typing, warnings
 import skfmm
 import numpy as np 
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Sequence
 from scipy import ndimage
 from .arrayBase import ArrayNd
 from ..misc import lisJobParallel
@@ -74,7 +74,6 @@ class MaskEvalNd(MaskNd):
 		union = union + epsilon
 		return intersection/union
 
-
 	@staticmethod
 	def batchIouLoop(mask1s: np.ndarray, mask2s: np.ndarray) -> np.ndarray:
 		"""
@@ -133,16 +132,52 @@ class MaskEvalNd(MaskNd):
 			output = np.concatenate((output, [_dice]))
 		return output
 
+	@classmethod
+	def sensitivity(cls, gt: np.ndarray, pred: np.ndarray) -> float:
+		epsilon = 1e-7
+		intersection = np.logical_and(gt, pred)
+		intersection = intersection.sum()
+		denominator = gt.sum() + epsilon
+		return intersection/denominator
+
+	@classmethod
+	def batchSensitivity_p(cls, gts: Sequence[np.ndarray], preds: Sequence[np.ndarray]) -> List[float]:
+		def _func(mask_pairs):
+			out = []
+			for pair in mask_pairs:
+				out_ = cls.sensitivity(pair[0], pair[1])
+				out.append(out_)
+			return out
+		return lisJobParallel(_func, list(zip(gts, preds)), use_buffer = False)
+
+	@classmethod
+	def specificity(cls, gt: np.ndarray, pred: np.ndarray) -> np.ndarray:
+		epsilon = 1e-7
+		intersection = np.logical_and(1-gt, 1-pred)
+		intersection = intersection.sum()
+		denominator = (1-gt).sum() + epsilon
+		return intersection/denominator
+
+	@classmethod
+	def batchSpecificity_p(cls, gts: Sequence[np.ndarray], preds: Sequence[np.ndarray]) -> List[float]:
+		def _func(mask_pairs):
+			out = []
+			for pair in mask_pairs:
+				out_ = cls.specificity(pair[0], pair[1])
+				out.append(out_)
+			return out
+		return lisJobParallel(_func, list(zip(gts, preds)), use_buffer = False)
+
 	#///////////////////////////////////////////////Hausdorff distance////////////////////////////////////
-	@staticmethod
-	def hausdorffDistance(msk1: np.ndarray, msk2: np.ndarray, spacing:float = 1, is_edge_mask = False) -> float:
+	@classmethod
+	def hausdorffDistance(cls, msk1: np.ndarray, msk2: np.ndarray, spacing:float = 1, is_edge_mask = False) -> Union[float, None]:
 		assert msk1.shape == msk2.shape, "The masks should have same shape"
 		if (msk1 == 0).all() or (msk2 == 0).all():
 			warnings.warn("Zero mask detected when calculating hausdorff distance, return None for this pair.")
 			return None
 		if not is_edge_mask:
-			edge_mask1 = MaskNd.getEdgeMask(msk1, thickness=1, op_for_edge="dilate").astype(np.float)
-			edge_mask2 = MaskNd.getEdgeMask(msk2, thickness=1, op_for_edge="dilate").astype(np.float)
+			edge_mask1 = cls.getEdgeMask(msk1, thickness=1, op_for_edge="dilate").astype(np.float)
+			edge_mask2 = cls.getEdgeMask(msk2, thickness=1, op_for_edge="dilate").astype(np.float)
 		else:
 			edge_mask1 = msk1
 			edge_mask2 = msk2
@@ -154,8 +189,43 @@ class MaskEvalNd(MaskNd):
 		dis = np.max((fv_phi1.max(), fv_phi2.max()))
 		return dis*spacing
 
+	@classmethod
+	def rmsDistance(cls, msk1: np.ndarray, msk2: np.ndarray, spacing: float = 1, is_edge_mask = False) -> Union[float, None]:
+		assert msk1.shape == msk2.shape, "The masks should have same shape"
+		if (msk1 == 0).all() or (msk2 == 0).all():
+			warnings.warn("Zero mask detected when calculating RMS distance, return None for this pair.")
+			return None
+		if not is_edge_mask:
+			edge_mask1 = cls.getEdgeMask(msk1, thickness=1, op_for_edge="dilate").astype(np.float)
+			edge_mask2 = cls.getEdgeMask(msk2, thickness=1, op_for_edge="dilate").astype(np.float)
+		else:
+			edge_mask1 = msk1
+			edge_mask2 = msk2
+		phi1 = skfmm.distance(0.5-edge_mask1)
+		phi2 = skfmm.distance(0.5-edge_mask2)
+		# flatten valid data
+		fv_phi1 = np.ma.masked_array(phi1, mask = 1-edge_mask2).compressed()
+		fv_phi2 = np.ma.masked_array(phi2, mask = 1-edge_mask1).compressed()
+		dis1 = np.sqrt((fv_phi1**2).sum())/len(fv_phi1)
+		dis2 = np.sqrt((fv_phi2**2).sum())/len(fv_phi2)
+		return spacing * (dis1 + dis2)/2
+
+	@classmethod
+	def batchRMSDistance(cls, msk1s: typing.Union[np.ndarray, list], msk2s: typing.Union[np.ndarray, list], **kwargs) -> typing.List[Union[float, None]]:
+		return [MaskEvalNd.rmsDistance(msk1, msk2, **kwargs) for msk1, msk2 in zip(msk1s, msk2s)]
+
+	@classmethod
+	def batchRMSDistance_p(cls, msk1s: typing.Union[np.ndarray, list], msk2s: typing.Union[np.ndarray, list], n_workers = -1, **kwargs) -> typing.List[float]:
+		def _func(mask_pairs):
+			result = []
+			for i in range(len(mask_pairs)):
+				result_ = cls.rmsDistance(*mask_pairs[i], **kwargs)
+				result.append(result_)
+			return result
+		return lisJobParallel(_func, list(zip(msk1s, msk2s)), use_buffer=False, n_workers=n_workers)
+
 	@staticmethod
-	def batchHausdorffDistance(msk1s: typing.Union[np.ndarray, list], msk2s: typing.Union[np.ndarray, list], **kwargs) -> typing.List[float]:
+	def batchHausdorffDistance(msk1s: typing.Union[np.ndarray, list], msk2s: typing.Union[np.ndarray, list], **kwargs) -> typing.List[Union[float, None]]:
 		return [MaskEvalNd.hausdorffDistance(msk1, msk2, **kwargs) for msk1, msk2 in zip(msk1s, msk2s)]
 
 	@staticmethod

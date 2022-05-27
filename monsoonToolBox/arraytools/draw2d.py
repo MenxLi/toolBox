@@ -32,11 +32,9 @@ class Drawer2D(Mask2D):
         return f_im.astype(np.uint8)
     
     @staticmethod
-    def drawMasks(img: np.ndarray, masks: List[np.ndarray], alpha: float = 0, colors : Union[None, List[tuple], tuple] = None):
+    def drawMasks(img: np.ndarray, masks: List[np.ndarray], alpha: float = 1, colors : Union[None, List[tuple], tuple] = None):
         """
         - alpha: transparency
-        - mode (str): 
-            "outline", "fill"
         """
         if colors is None:
             colors = [Drawer2D.DEFAULT_COLOR]*len(masks)
