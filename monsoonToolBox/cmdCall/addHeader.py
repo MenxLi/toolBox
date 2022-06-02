@@ -1,15 +1,8 @@
 from typing import List
-import argparse, os, sys
+import argparse, os, sys, string, datetime
 from monsoonToolBox.filetools.files import recursivlyFindFilesByExtension
 
-LICENSE = "\
-Copyright (C) - All Rights Reserved\n\
-Unauthorized copying of this file, via any medium is strictly prohibited\n\
-Proprietary and confidential\n\
-Written by Mengxun Li <mengxunli@whu.edu.cn>, June 2022\
-"
-
-MARKER = "#==***---------------------------------------------------------***==#"
+MARKER = "+==***---------------------------------------------------------***==+"
 
 def _splitLine(line: str, n_max: int, keep_word = False) -> List[str]:
 	if len(line) <= n_max:
@@ -57,7 +50,7 @@ def delHeader(content: str) -> str:
 	marker_pos = []
 	for i in range(len(content_split)):
 		line = content_split[i]
-		if line == MARKER:
+		if line == wrapLine(MARKER):
 			marker_pos.append(i)
 	if len(marker_pos) != 2 or marker_pos[0] > 3:
 		raise LookupError("Can't find proper header")
@@ -65,11 +58,14 @@ def delHeader(content: str) -> str:
 	return "\n".join(content_split)
 
 def _getHeader(header: str) -> str:
-	LINE_HEAD = "#|  "
-	LINE_TAIL = "  |#"
+	LINE_HEAD = "|  "
+	LINE_TAIL = "  |"
 	HEAD_TAIL = LINE_HEAD + LINE_TAIL
 	n_max = len(MARKER) - len(HEAD_TAIL)       # maximum characters per line
 	assert n_max > 0
+	
+	header = Replacer(header).parse()
+
 	header_split = header.split("\n")
 	_aim_split = []
 	for line in header_split:
@@ -80,7 +76,11 @@ def _getHeader(header: str) -> str:
 		n_less = n_max - len(line)
 		aim_split.append(LINE_HEAD + line + " "*n_less + LINE_TAIL)
 	aim_split = [MARKER] + aim_split + [MARKER]
+	aim_split = [ wrapLine(line) for line in aim_split ]
 	return "\n".join(aim_split)
+
+def wrapLine(line: str) -> str:
+	return "#" + line + "#"
 
 def addHeader(content: str, header: str) -> str:
 	try:
@@ -89,13 +89,58 @@ def addHeader(content: str, header: str) -> str:
 		...
 	return _getHeader(header) + "\n" + content
 
+class Replacer:
+	STAMP_DATE = "DATE"
+	STAMP_AUTHOR = "AUTHOR"
+	STAMP_REPO = "REPO"
+	STAMP_FILENAME = "FILENAME"
+	def __init__(self, content: str):
+		self.content = string.Template(content)
+
+		self.VAL_AUTHOR = ""
+		self.VAL_REPO = ""
+		self.VAL_FILENAME = ""
+	
+	def config(self, **kwargs):
+		for k, v in kwargs.items():
+			setattr(self, "VAL_"+k.upper(), v)
+	
+	def _date(self):
+		date = datetime.datetime.now()
+		date = date.strftime("%Y-%m-%d")
+		return date
+
+	def _author(self):
+		return self.VAL_AUTHOR
+
+	def _repo(self):
+		return self.VAL_REPO
+
+	def _filename(self):
+		return self.VAL_FILENAME
+
+	def parse(self):
+		return self.content.substitute(
+			{
+				self.STAMP_DATE: self._date(),
+				self.STAMP_AUTHOR: self._author(),
+				self.STAMP_REPO: self._repo(),
+				self.STAMP_FILENAME: self._filename(),
+			}
+		)
+
 def main():
 	parser = argparse.ArgumentParser("Add header")
-	parser.add_argument("-i", "--input_file")
+	parser.add_argument("input_file")
+	parser.add_argument("-d", "--delete", action="store_true")
 
-	header = sys.stdin.read()
 	args = parser.parse_args()
 	aim = args.input_file
+
+	if args.delete:
+		header = None
+	else:
+		header = sys.stdin.read()
 
 	if os.path.isdir(aim):
 		py_files = recursivlyFindFilesByExtension(aim, [".py"])
