@@ -22,6 +22,7 @@ setup(
             "tbx_countLine=monsoonToolBox.cmdCall.devUtils:countLine",
             "tbx_crun=monsoonToolBox.cmdCall.devUtils:crun",
             "tbx_findVTKModules=monsoonToolBox.cmdCall.vtkUtils:callFindVTKModules",
+            "tbx_codeHeader=monsoonToolBox.cmdCall.addHeader:main",
         ]
     }
 )
