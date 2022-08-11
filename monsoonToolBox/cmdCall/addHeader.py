@@ -82,7 +82,7 @@ def _getHeader(header: str) -> str:
 	return "\n".join(aim_split)
 
 def wrapLine(line: str) -> str:
-	return "#" + line + "#"
+	return "# " + line + " #"
 
 def addHeader(content: str, header: str, config: dict) -> str:
 	global replace_config
@@ -168,10 +168,15 @@ def main():
 			for k, v in args.config.items():
 				config[k] = v
 			modified = addHeader(f_content, header, config)
+			with open(f_path, 'w') as fp:
+				fp.write(modified)
 		else:
-			modified = delHeader(f_content)
-		with open(f_path, 'w') as fp:
-			fp.write(modified)
+			try:
+				modified = delHeader(f_content)
+				with open(f_path, 'w') as fp:
+					fp.write(modified)
+			except LookupError:
+				print("Failed to delete header for: %s" % f_path)
 
 if __name__ == "__main__":
 	main()
