@@ -27,7 +27,7 @@ class WarmUpLR(LearningRateAbstract):
     def __call__(self, epoch: int, max_epoch: int, base_lr: float) -> None:
         warmup_stop_epoch = int(max_epoch*self.warmup_frac)
         if epoch<warmup_stop_epoch:
-            return base_lr*float(epoch)/warmup_stop_epoch
+            return base_lr*float(epoch + 1)/(warmup_stop_epoch + 1)
         else:
             _epoch = epoch - warmup_stop_epoch
             _max_epoch = max_epoch - warmup_stop_epoch
