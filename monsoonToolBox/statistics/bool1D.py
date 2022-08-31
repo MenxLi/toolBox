@@ -128,7 +128,7 @@ class Bool1D(Stat1D):
 
 
     @staticmethod
-    def plotConfusion(y_true, y_pred, save: str = None, labels: List[str] = None, **sns_heatmap_params):
+    def plotConfusion(y_true, y_pred, save: str = None, labels: List[str] = None, plt_call: dict = {}, **sns_heatmap_params):
         # https://datatofish.com/confusion-matrix-python/
         import seaborn as sn
         # if not isinstance(y_true, np.ndarray):
@@ -145,6 +145,8 @@ class Bool1D(Stat1D):
         sn.heatmap(confusion_matrix, annot=True, xticklabels = labels, yticklabels=labels, **sns_heatmap_params)
         plt.xlabel("Predicted")
         plt.ylabel("Actual")
+        for k, v in plt_call.items():
+            getattr(plt, k)(v)
         if not save:
             plt.show()
         else:
