@@ -4,6 +4,7 @@
 *.ipynb*
 *.egg-info
 *_tmp.*
+.DS_Store
 test.py
 build
 dist
