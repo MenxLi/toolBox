@@ -14,11 +14,5 @@ def setMatplotlibBackend(backend: str):
     matplotlib.use(backend)
 
 def setPltFiguresize(w: int, h: int):
-    """set matplotlib backend, avaliable backends:
-    https://matplotlib.org/stable/users/explain/backends.html
-
-    Args:
-        backend (str)
-    """
     import matplotlib.pyplot as plt
     plt.rcParams["figure.figsize"] = (w, h)
