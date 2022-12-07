@@ -1,11 +1,13 @@
+from abc import ABC, abstractmethod
 from typing import Any, Callable, List, Union
 import numpy as np
 from numpy.lib.arraysetops import isin
 
-class LearningRateAbstract(object):
+class LearningRateAbstract(ABC):
     def __init__(self) -> None:
         super().__init__()
     
+    @abstractmethod
     def __call__(self, epoch: int, max_epoch: int, base_lr: float) -> None:
         raise NotImplementedError()
     
@@ -38,25 +40,32 @@ class WarmUpLR(LearningRateAbstract):
 
 
 class PolyLR(LearningRateAbstract):
-    def __init__(self, power = 2) -> None:
+    def __init__(self, power = 2, min_lr = 0) -> None:
         super().__init__()
         self.power = power
+        self.min_lr = min_lr
 
     def __call__(self, epoch: int, max_epoch: int, base_lr: float) -> None:
-        return base_lr*(1 - (epoch/max_epoch))**self.power
+        return self.min_lr + (base_lr - self.min_lr)*(1 - (epoch/max_epoch))**self.power
     
     def __str__(self) -> str:
         return __class__.__name__ + "(power = {})".format(self.power)
 
 class CosineLR(LearningRateAbstract):
+    def __init__(self, min_lr = 0) -> None:
+        super().__init__()
+        self.min_lr = min_lr
 
     def __call__(self, epoch: int, max_epoch: int, base_lr: float) -> None:
-        return 1/2*(np.cos(np.pi*epoch/max_epoch)+1)*base_lr
+        return 1/2*(np.cos(np.pi*epoch/max_epoch)+1)*(base_lr-self.min_lr) + self.min_lr
     
     def __str__(self) -> str:
         return __class__.__name__
 
 class ConstantLR(LearningRateAbstract):
+    def __init__(self) -> None:
+        super().__init__()
+
     def __call__(self, epoch: int, max_epoch: int, base_lr: float) -> None:
         return base_lr
     
