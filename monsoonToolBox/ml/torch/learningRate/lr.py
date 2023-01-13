@@ -52,12 +52,13 @@ class PolyLR(LearningRateAbstract):
         return __class__.__name__ + "(power = {})".format(self.power)
 
 class CosineLR(LearningRateAbstract):
-    def __init__(self, min_lr = 0) -> None:
+    def __init__(self, min_lr_fraction = 0.01) -> None:
         super().__init__()
-        self.min_lr = min_lr
+        self.min_lr_frac = min_lr_fraction
 
     def __call__(self, epoch: int, max_epoch: int, base_lr: float) -> None:
-        return 1/2*(np.cos(np.pi*epoch/max_epoch)+1)*(base_lr-self.min_lr) + self.min_lr
+        min_lr = base_lr*self.min_lr_frac
+        return 1/2*(np.cos(np.pi*epoch/max_epoch)+1)*(base_lr-min_lr) + min_lr
     
     def __str__(self) -> str:
         return __class__.__name__
