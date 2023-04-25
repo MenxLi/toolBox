@@ -150,7 +150,7 @@ class Bool1D(Stat1D):
         if not save:
             plt.show()
         else:
-            plt.savefig(save)
+            plt.savefig(save, dpi = 300)
 
     @staticmethod
     def _convertConfusionMatrixAsDataFrame(confusion):
