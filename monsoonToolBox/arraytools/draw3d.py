@@ -103,7 +103,9 @@ class Drawer3D(Mask3D):
 			writer.SetInputConnection(im.GetOutputPort())
 			writer.SetFileName(save_to)
 			writer.Write()
-		ren_win.Render()
 		# print(ren_win.GetSize())
 		if show_window:
 			iren.Start()
+		else:
+			ren_win.SetOffScreenRendering(True)
+		ren_win.Render()
