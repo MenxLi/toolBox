@@ -8,17 +8,19 @@ def countLine() -> None:
     Count file lines from a directory of specific suffix\
     i.e. countLine . -s .py .json -i .git build\
     "
+    __default_ignore = ["dist", "__pycache__", ".git", "build", "node_modules"]
     parser = argparse.ArgumentParser(description=_description)
     parser.add_argument("path", type = str, nargs="+")
     parser.add_argument("-s", "--suffix", nargs="+", default=[".txt", ".py", ".js", ".c", ".h", ".html", ".json"])
-    parser.add_argument("-i", "--ignore", nargs="+", default=["dist", "__pycache__", ".git", "build"])
+    parser.add_argument("-i", "--ignore", nargs="+", default=[])
     args = parser.parse_args()
 
     def _getFile_recursive(pth: str, suffix: List[str]) -> List[str]:
         file_valid = []
         assert os.path.isdir(pth), "input should be a directory."
+        ignore_dirs = __default_ignore + args.ignore
         for f in os.listdir(pth):
-            if f in args.ignore:
+            if f in ignore_dirs:
                 continue
             f_path = os.path.join(pth, f)
             if os.path.isfile(f_path):
@@ -43,7 +45,7 @@ def countLine() -> None:
     for f in valid_files:
         suffix_ = "."+f.split(".")[-1]
         lines_by_suffix.setdefault(suffix_, 0)
-        with open(f, "r") as fp:
+        with open(f, "r", encoding='utf-8') as fp:
             count_ = len(fp.readlines())
             total_count += count_
             lines_by_suffix[suffix_] += count_
