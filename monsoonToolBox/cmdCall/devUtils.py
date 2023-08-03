@@ -11,16 +11,25 @@ def countLine() -> None:
     __default_ignore = ["dist", "__pycache__", ".git", "build", "node_modules"]
     parser = argparse.ArgumentParser(description=_description)
     parser.add_argument("path", type = str, nargs="+")
-    parser.add_argument("-s", "--suffix", nargs="+", default=[".txt", ".py", ".js", ".c", ".h", ".html", ".json"])
+    parser.add_argument("-s", "--suffix", nargs="+", default=[
+        ".py", 
+        ".txt", ".md", 
+        ".js", ".ts", ".jsx", ".tsx", ".vue", ".html", ".json", 
+        ".c", ".h", ".cpp", ".hpp", ".cc", ".cxx", ".hxx",
+        ])
     parser.add_argument("-i", "--ignore", nargs="+", default=[])
     args = parser.parse_args()
+
+    ignore_dirs = __default_ignore + args.ignore
+    for i in range(len(ignore_dirs)):
+        ignore_dirs[i] = os.path.abspath(ignore_dirs[i])
 
     def _getFile_recursive(pth: str, suffix: List[str]) -> List[str]:
         file_valid = []
         assert os.path.isdir(pth), "input should be a directory."
-        ignore_dirs = __default_ignore + args.ignore
         for f in os.listdir(pth):
-            if f in ignore_dirs:
+            if os.path.abspath(os.path.join(pth, f)) in ignore_dirs or \
+            pth in ignore_dirs:
                 continue
             f_path = os.path.join(pth, f)
             if os.path.isfile(f_path):
