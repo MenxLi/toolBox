@@ -54,12 +54,17 @@ def countLine() -> None:
     for f in valid_files:
         suffix_ = "."+f.split(".")[-1]
         lines_by_suffix.setdefault(suffix_, 0)
-        with open(f, "r", encoding='utf-8') as fp:
-            count_ = len(fp.readlines())
-            total_count += count_
-            lines_by_suffix[suffix_] += count_
-        outcome[suffix_]["files"].append(f)
-        outcome[suffix_]["count"] += count_
+        try:
+            with open(f, "r", encoding='utf-8') as fp:
+                count_ = len(fp.readlines())
+                total_count += count_
+                lines_by_suffix[suffix_] += count_
+            outcome[suffix_]["files"].append(f)
+            outcome[suffix_]["count"] += count_
+        except UnicodeDecodeError as e:
+            outcome.setdefault("__error", []).append(f)
+            print(f"Error on : {f}")
+            print(e)
     pprint.pprint(outcome)
     print()
     print("Total: ", total_count)
